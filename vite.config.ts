@@ -5,4 +5,5 @@ export default defineConfig({
   plugins: [react()],
   // maplibre-gl alone is ~1 MB; nothing to split yet.
   build: { chunkSizeWarningLimit: 1500 },
+  worker: { format: "es" },
 });

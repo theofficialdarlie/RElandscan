@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MlMap } from "maplibre-gl";
+import { Map as MlMap, NavigationControl, ScaleControl, setWorkerUrl, type GeoJSONSource } from "maplibre-gl";
+// maplibre-gl 6 ships its worker as a separate ES module; let Vite bundle it and tell maplibre where it lives.
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { KLANG_VALLEY_BOUNDS, KL_CENTER, MAP_STYLE } from "./lib/mapStyle";
 import { centroid, polygonAreaM2, type LngLat } from "./lib/geo";
 import { fetchSiteData, type SiteData } from "./lib/osm";
@@ -9,6 +11,8 @@ import Feasibility from "./components/Feasibility";
 
 type Mode = "inspect" | "draw";
 type Basemap = "streets" | "satellite";
+
+setWorkerUrl(workerUrl);
 
 const EMPTY: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 
@@ -84,7 +88,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const map = new maplibregl.Map({
+    const map = new MlMap({
       container: containerRef.current!,
       style: MAP_STYLE,
       center: KL_CENTER,
@@ -92,8 +96,8 @@ export default function App() {
       maxBounds: KLANG_VALLEY_BOUNDS,
     });
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
+    map.addControl(new NavigationControl(), "top-right");
+    map.addControl(new ScaleControl({ unit: "metric" }), "bottom-right");
     map.doubleClickZoom.disable();
 
     map.on("load", () => {
